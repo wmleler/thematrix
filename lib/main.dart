@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'dart:ui' show lerpDouble;
+// import 'dart:ui' show lerpDouble;
 
 void main() {
   runApp(new MyApp());
@@ -16,13 +16,12 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Flutter 3D Demo'),
+      home: new MyHomePage(title: 'The Matrix 3D'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-
   MyHomePage({Key key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -41,8 +40,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-
   double rotation = 0.0;
+  Matrix4 perspective = new Matrix4.identity();
   int counter = 0;
 
   AnimationController animation;
@@ -54,16 +53,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     animation = new AnimationController(
       duration: const Duration(milliseconds: 4000),
       vsync: this,
-    )
-      ..addListener(() {
+    )..addListener(() {
         setState(() {
-          rotation = -Curves.easeOut.transform(animation.value)*8*PI;
+          rotation = -Curves.easeOut.transform(animation.value) * 8 * PI;
         });
       });
     rotation = 0.0;
   }
 
-  void _spinZ(DragEndDetails details) {
+  void _spinZ() {
     axis = 'Z';
     animation.forward(from: 0.0);
   }
@@ -78,42 +76,63 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     animation.forward(from: 0.0);
   }
 
+  Matrix4 _xmat(num pv) {
+    return new Matrix4(1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 0.00001, pv * 0.0001,
+        0.0, 0.0, 0.0, 1.0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Transform(
-      transform: axis == 'X' ? new Matrix4.rotationX(rotation/4) :
-          (axis == 'Y' ? new Matrix4.rotationY(rotation/4) :
-          new Matrix4.rotationZ(rotation/4)),
-      alignment: FractionalOffset.center,
-      child: new Scaffold(
-        appBar: new AppBar(
-          title: new Text(widget.title),
-        ),
-        floatingActionButton: new FloatingActionButton(
-          onPressed: () => setState(()=>counter++),
-          tooltip: 'Increment',
-          child: new Icon(Icons.add),
-        ),
-        body: new Builder(builder: (BuildContext ctx)=>new GestureDetector(
-            onVerticalDragEnd: _spinZ,
-            onHorizontalDragEnd: _spinY,
-            child: new Transform(
-              transform: new Matrix4.rotationZ(rotation),
-              alignment: FractionalOffset.center,
-              child: new Center(
-                  child: new Column(
+        transform: perspective.multiplied(axis == 'X'
+            ? new Matrix4.rotationX(rotation / 4)
+            : (axis == 'Y'
+                ? new Matrix4.rotationY(rotation / 4)
+                : new Matrix4.rotationZ(rotation / 4))),
+        alignment: FractionalOffset.center,
+        child: new Scaffold(
+          appBar: new AppBar(
+            title: new Text(widget.title),
+          ),
+          floatingActionButton: new FloatingActionButton(
+            onPressed: _spinZ,
+            tooltip: 'Spin',
+            child: new Icon(Icons.replay),
+          ),
+          body: new Builder(builder: (BuildContext ctx) {
+            return new GestureDetector(
+                onVerticalDragEnd: _spinX,
+                onHorizontalDragEnd: _spinY,
+                child: new Transform(
+                  transform: new Matrix4.rotationZ(rotation),
+                  alignment: FractionalOffset.center,
+                  child: new Center(
+                      child: new Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      new Text("Count = $counter"),
-                      new RaisedButton(
-                        child: new Text("Widget Spinner"),
-                        color: Colors.yellow,
-                        onPressed: () => setState(()=>counter++),
+                      new FloatingActionButton(
+                        onPressed: () => setState(() { perspective = _xmat(++counter); }),
+                        tooltip: 'Increment',
+                        child: new Icon(Icons.arrow_upward),
+                      ),
+                      new Text(' '),
+                      new Text("Perspective: $counter",
+                          style: DefaultTextStyle
+                              .of(context)
+                              .style
+                              .apply(fontSizeFactor: 0.5)),
+                      new Text(' '),
+                      new FloatingActionButton(
+                        onPressed: () => setState(() { perspective = _xmat(--counter); }),
+                        tooltip: 'Decrement',
+                        child: new Icon(Icons.arrow_downward),
                       ),
                     ],
                   )),
-            ))),
-      ));
+                ));
+          }),
+        ));
   }
-
 }
