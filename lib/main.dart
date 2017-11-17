@@ -67,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   void _spinY(DragEndDetails details) {
+    // print('details: ${details.velocity.pixelsPerSecond.dx}');
     axis = 'Y';
     animation.forward(from: 0.0);
   }
