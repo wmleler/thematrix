@@ -77,6 +77,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     animation.forward(from: 0.0);
   }
 
+  // http://web.iitd.ac.in/~hegde/cad/lecture/L9_persproj.pdf
   Matrix4 _xmat(num pv) {
     return new Matrix4(1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
