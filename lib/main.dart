@@ -7,6 +7,8 @@ void main() {
   runApp(new MyApp());
 }
 
+const int MAX_ABS_PERSPECTIVE = 20;
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -79,10 +81,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   // http://web.iitd.ac.in/~hegde/cad/lecture/L9_persproj.pdf
   Matrix4 _xmat(num pv) {
-    return new Matrix4(1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        0.0, 0.0, 0.00001, pv * 0.0001,
-        0.0, 0.0, 0.0, 1.0);
+    return new Matrix4(
+      1.0, 0.0, 0.0, 0.0, //
+      0.0, 1.0, 0.0, 0.0, //
+      0.0, 0.0, 0.00001, pv * 0.0001, //
+      0.0, 0.0, 0.0, 1.0,
+    );
   }
 
   @override
@@ -115,19 +119,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       new FloatingActionButton(
-                        onPressed: () => setState(() { perspective = _xmat(++counter); }),
+                        onPressed: () => setState(() {
+                              if (counter < MAX_ABS_PERSPECTIVE) {
+                                perspective = _xmat(++counter);
+                              }
+                            }),
                         tooltip: 'Increment',
                         child: new Icon(Icons.arrow_upward),
                       ),
                       new Text(' '),
                       new Text("Perspective: $counter",
-                          style: DefaultTextStyle
-                              .of(context)
-                              .style
-                              .apply(fontSizeFactor: 0.5)),
+                          style: DefaultTextStyle.of(context).style.apply(
+                              fontSizeFactor: 0.3 + (counter.abs() * .1))),
                       new Text(' '),
                       new FloatingActionButton(
-                        onPressed: () => setState(() { perspective = _xmat(--counter); }),
+                        onPressed: () => setState(() {
+                              if (counter > -MAX_ABS_PERSPECTIVE) {
+                                perspective = _xmat(--counter);
+                              }
+                            }),
                         tooltip: 'Decrement',
                         child: new Icon(Icons.arrow_downward),
                       ),
