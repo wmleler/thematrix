@@ -98,53 +98,48 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ? new Matrix4.rotationY(rotation / 4)
                 : new Matrix4.rotationZ(rotation / 4))),
         alignment: FractionalOffset.center,
-        child: new Scaffold(
-          appBar: new AppBar(
-            title: new Text(widget.title),
-          ),
-          floatingActionButton: new FloatingActionButton(
-            onPressed: _spinZ,
-            tooltip: 'Spin',
-            child: new Icon(Icons.replay),
-          ),
-          body: new Builder(builder: (BuildContext ctx) {
-            return new GestureDetector(
-                onVerticalDragEnd: _spinX,
-                onHorizontalDragEnd: _spinY,
-                child: new Transform(
-                  transform: new Matrix4.rotationZ(rotation),
-                  alignment: FractionalOffset.center,
-                  child: new Center(
+        child: new GestureDetector(
+            onVerticalDragEnd: _spinX,
+            onHorizontalDragEnd: _spinY,
+            child: new Center(
+                child: new Scaffold(
+                    appBar: new AppBar(
+                      title: new Text(widget.title),
+                    ),
+                    floatingActionButton: new FloatingActionButton(
+                      onPressed: _spinZ,
+                      tooltip: 'Spin',
+                      child: new Icon(Icons.replay),
+                    ),
+                    body: new Center(
                       child: new Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      new FloatingActionButton(
-                        onPressed: () => setState(() {
-                              if (counter < MAX_ABS_PERSPECTIVE) {
-                                perspective = _xmat(++counter);
-                              }
-                            }),
-                        tooltip: 'Increment',
-                        child: new Icon(Icons.arrow_upward),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          new FloatingActionButton(
+                            onPressed: () => setState(() {
+                                  if (counter < MAX_ABS_PERSPECTIVE) {
+                                    perspective = _xmat(++counter);
+                                  }
+                                }),
+                            tooltip: 'Increment',
+                            child: new Icon(Icons.arrow_upward),
+                          ),
+                          new Text(' '),
+                          new Text("Perspective: $counter",
+                              style: DefaultTextStyle.of(context).style.apply(
+                                  fontSizeFactor: 0.3 + (counter.abs() * .1))),
+                          new Text(' '),
+                          new FloatingActionButton(
+                            onPressed: () => setState(() {
+                                  if (counter > -MAX_ABS_PERSPECTIVE) {
+                                    perspective = _xmat(--counter);
+                                  }
+                                }),
+                            tooltip: 'Decrement',
+                            child: new Icon(Icons.arrow_downward),
+                          ),
+                        ],
                       ),
-                      new Text(' '),
-                      new Text("Perspective: $counter",
-                          style: DefaultTextStyle.of(context).style.apply(
-                              fontSizeFactor: 0.3 + (counter.abs() * .1))),
-                      new Text(' '),
-                      new FloatingActionButton(
-                        onPressed: () => setState(() {
-                              if (counter > -MAX_ABS_PERSPECTIVE) {
-                                perspective = _xmat(--counter);
-                              }
-                            }),
-                        tooltip: 'Decrement',
-                        child: new Icon(Icons.arrow_downward),
-                      ),
-                    ],
-                  )),
-                ));
-          }),
-        ));
+                    )))));
   }
 }
