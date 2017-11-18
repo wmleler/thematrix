@@ -48,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   AnimationController animation;
   String axis = 'Y';
+  double scale = 1.0;
 
   @override
   void initState() {
@@ -80,19 +81,29 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   // http://web.iitd.ac.in/~hegde/cad/lecture/L9_persproj.pdf
-  Matrix4 _xmat(num pv) {
+  // create perspective matrix
+  Matrix4 _pmat(num pv) {
     return new Matrix4(
       1.0, 0.0, 0.0, 0.0, //
       0.0, 1.0, 0.0, 0.0, //
-      0.0, 0.0, 0.00001, pv * 0.0001, //
+      0.0, 0.0, 1.0, pv * 0.0001, //
       0.0, 0.0, 0.0, 1.0,
     );
+  }
+
+  _scale_update(ScaleUpdateDetails details) {
+    if (details.scale != 1.0) {
+      setState(() {
+        scale = details.scale / scale;
+        print('${details.scale}');
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return new Transform(
-        transform: perspective.multiplied(axis == 'X'
+        transform: perspective.scaled(scale, scale, 1.0).multiplied(axis == 'X'
             ? new Matrix4.rotationX(rotation / 4)
             : (axis == 'Y'
                 ? new Matrix4.rotationY(rotation / 4)
@@ -101,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: new GestureDetector(
             onVerticalDragEnd: _spinX,
             onHorizontalDragEnd: _spinY,
+//            onScaleUpdate: _scale_update,
             child: new Center(
                 child: new Scaffold(
                     appBar: new AppBar(
@@ -118,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           new FloatingActionButton(
                             onPressed: () => setState(() {
                                   if (counter < MAX_ABS_PERSPECTIVE) {
-                                    perspective = _xmat(++counter);
+                                    perspective = _pmat(++counter);
                                   }
                                 }),
                             tooltip: 'Increment',
@@ -127,12 +139,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           new Text(' '),
                           new Text("Perspective: $counter",
                               style: DefaultTextStyle.of(context).style.apply(
-                                  fontSizeFactor: 0.3 + (counter.abs() * .1))),
+                                  fontSizeFactor: 0.6 + (counter.abs() * .01))),
                           new Text(' '),
                           new FloatingActionButton(
                             onPressed: () => setState(() {
                                   if (counter > -MAX_ABS_PERSPECTIVE) {
-                                    perspective = _xmat(--counter);
+                                    perspective = _pmat(--counter);
                                   }
                                 }),
                             tooltip: 'Decrement',
