@@ -49,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   AnimationController animation;
   String axis = 'Y';
   double scale = 1.0;
+  Offset startPoint;
 
   @override
   void initState() {
@@ -91,13 +92,27 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
+  _scale_start(ScaleStartDetails details) {
+    print('scale_start: $details');
+    // save point where finger went down
+    startPoint = details.focalPoint;
+  }
+
   _scale_update(ScaleUpdateDetails details) {
-    if (details.scale != 1.0) {
-      setState(() {
+//    print('${details}');
+    setState(() {
+      if (details.scale == 1.0) { // tilt (pan)
+        // TODO: perform tilt based on details.focalPoint - startPoint
+        print('scale_update: ${details.focalPoint - startPoint}');
+      } else {  // scale
         scale = details.scale / scale;
-        print('${details.scale}');
-      });
-    }
+      }
+    });
+  }
+
+  // deprecated. Use focalPoint from _scale_update instead
+  _pan_update(DragUpdateDetails details) {
+    print('pan_update: ${details}');
   }
 
   @override
@@ -110,9 +125,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 : new Matrix4.rotationZ(rotation / 4))),
         alignment: FractionalOffset.center,
         child: new GestureDetector(
-            onVerticalDragEnd: _spinX,
-            onHorizontalDragEnd: _spinY,
-//            onScaleUpdate: _scale_update,
+//            onVerticalDragEnd: _spinX,
+//            onHorizontalDragEnd: _spinY,
+//            onPanUpdate: _pan_update,
+            onScaleStart: _scale_start,
+            onScaleUpdate: _scale_update,
             child: new Center(
                 child: new Scaffold(
                     appBar: new AppBar(
