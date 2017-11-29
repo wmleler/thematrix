@@ -101,10 +101,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   _scale_update(ScaleUpdateDetails details) {
 //    print('${details}');
     setState(() {
-      if (details.scale == 1.0) { // tilt (pan)
+      if (details.scale == 1.0) {
+        // tilt (pan)
         // TODO: perform tilt based on details.focalPoint - startPoint
         print('scale_update: ${details.focalPoint - startPoint}');
-      } else {  // scale
+      } else {
+        // scale
         scale = details.scale / scale;
       }
     });
@@ -150,6 +152,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                     perspective = _pmat(++counter);
                                   }
                                 }),
+                            mini: true,
                             tooltip: 'Increment',
                             child: new Icon(Icons.arrow_upward),
                           ),
@@ -164,6 +167,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                     perspective = _pmat(--counter);
                                   }
                                 }),
+                            mini: true,
                             tooltip: 'Decrement',
                             child: new Icon(Icons.arrow_downward),
                           ),
