@@ -43,11 +43,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  double rotX = 0.0;
-  double rotY = 0.0;
-  double rotZ = 0.0;
-  Matrix4 perspective = new Matrix4.identity();
-  int counter = 0;
+  double rotX;
+  double rotY;
+  double rotZ;
+  int counter;
+  Matrix4 perspective;
 
   AnimationController animation;
   double scale = 1.0;
@@ -82,6 +82,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     rotX = 0.0;
     rotY = 0.0;
     rotZ = 0.0;
+    counter = 10;
+    perspective = _pmat(counter);
     _recognizer = new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
 
@@ -112,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   _scaleStart(ScaleStartDetails details) {
-    print('scale_start: $details');
+//    print('scale_start: $details');
     // save point where finger went down
     startPoint = details.focalPoint;
   }
@@ -124,20 +126,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         // tilt (pan)
         // TODO: perform tilt based on details.focalPoint - startPoint
         Offset p = details.focalPoint - startPoint;
-        rotX = startPoint.dx + p.dx;
-        rotY = startPoint.dy + p.dy;
-        print('rotX: $rotX rotY: $rotY');
-        print('pan: ${details.focalPoint - startPoint}');
+        rotX = p.dy * 0.015;
+        rotY = -p.dx * 0.015;
+//        print('rotX: $rotX rotY: $rotY');
+//        print('pan: ${details.focalPoint - startPoint}');
       } else {
         // scale or rotate
-        print('scale/rotate: $details');
+//        print('scale/rotate: $details');
         scale = details.scale / scale;
       }
     });
   }
 
   _scaleEnd(ScaleEndDetails details) {
-    print('end: $details'); // velocity
+//    print('end: $details'); // velocity
   }
 
   onStart(Offset offset) {
@@ -148,12 +150,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return new Transform(
         transform: perspective.scaled(scale, scale, 1.0)
-          ..rotateX(rotX / 100.0)
-          ..rotateY(rotY / 100.0)
+          ..rotateX(rotX)
+          ..rotateY(rotY)
           ..rotateZ(rotZ / 4),
         alignment: FractionalOffset.center,
-        child: new Listener(
-          onPointerDown: _routePointer,
+//        child: new Listener(
+//          onPointerDown: _routePointer,
           child: new GestureDetector(
 //            onVerticalDragEnd: _spinX,
 //            onHorizontalDragEnd: _spinY,
@@ -203,8 +205,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             ),
                           ],
                         ),
-                      )))),
-        ));
+                      )
+                  )
+              )
+//          ),
+        )
+    );
   }
 
   void _routePointer(PointerEvent event) {
