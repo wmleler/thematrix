@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'dart:ui' show lerpDouble;
 
@@ -52,6 +53,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   double scale = 1.0;
   Offset startPoint;
 
+  ImmediateMultiDragGestureRecognizer _recognizer;
+
+  setMyTransform(Offset originOffset, DragUpdateDetails details) {
+    setState(() {
+      double x = originOffset.dx - details.globalPosition.dx;
+      double y = originOffset.dy - details.globalPosition.dy;
+      perspective
+        ..rotateX(x * 0.001)
+        ..rotateY(y * 0.001);
+
+      //      AnimationController ac = new AnimationController(duration: 100)
+      //      Curves.easeOut.transform();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     rotX = 0.0;
     rotY = 0.0;
     rotZ = 0.0;
+    _recognizer = new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
 
   void _spinZ() {
@@ -111,7 +128,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         rotY = startPoint.dy + p.dy;
         print('rotX: $rotX rotY: $rotY');
         print('pan: ${details.focalPoint - startPoint}');
-
       } else {
         // scale or rotate
         print('scale/rotate: $details');
@@ -124,60 +140,90 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     print('end: $details'); // velocity
   }
 
+  onStart(Offset offset) {
+    return new MyDrag(this);
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Transform(
         transform: perspective.scaled(scale, scale, 1.0)
-            ..rotateX(rotX / 100.0)..rotateY(rotY / 100.0)..rotateZ(rotZ / 4),
+          ..rotateX(rotX / 100.0)
+          ..rotateY(rotY / 100.0)
+          ..rotateZ(rotZ / 4),
         alignment: FractionalOffset.center,
-        child: new GestureDetector(
+        child: new Listener(
+          onPointerDown: _routePointer,
+          child: new GestureDetector(
 //            onVerticalDragEnd: _spinX,
 //            onHorizontalDragEnd: _spinY,
 //            onPanUpdate: _panUpdate,
-            onScaleStart: _scaleStart,
-            onScaleUpdate: _scaleUpdate,
-            onScaleEnd: _scaleEnd,
-            child: new Center(
-                child: new Scaffold(
-                    appBar: new AppBar(
-                      title: new Text(widget.title),
-                    ),
-                    floatingActionButton: new FloatingActionButton(
-                      onPressed: _spinZ,
-                      tooltip: 'Spin',
-                      child: new Icon(Icons.replay),
-                    ),
-                    body: new Center(
-                      child: new Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          new FloatingActionButton(
-                            onPressed: () => setState(() {
-                                  if (counter < MAX_ABS_PERSPECTIVE) {
-                                    perspective = _pmat(++counter);
-                                  }
-                                }),
-                            mini: true,
-                            tooltip: 'Increment',
-                            child: new Icon(Icons.arrow_upward),
-                          ),
-                          new Text(' '),
-                          new Text("Perspective: $counter",
-                              style: DefaultTextStyle.of(context).style.apply(
-                                  fontSizeFactor: 0.6 + (counter.abs() * .01))),
-                          new Text(' '),
-                          new FloatingActionButton(
-                            onPressed: () => setState(() {
-                                  if (counter > -MAX_ABS_PERSPECTIVE) {
-                                    perspective = _pmat(--counter);
-                                  }
-                                }),
-                            mini: true,
-                            tooltip: 'Decrement',
-                            child: new Icon(Icons.arrow_downward),
-                          ),
-                        ],
+              onScaleStart: _scaleStart,
+              onScaleUpdate: _scaleUpdate,
+              onScaleEnd: _scaleEnd,
+              child: new Center(
+                  child: new Scaffold(
+                      appBar: new AppBar(
+                        title: new Text(widget.title),
                       ),
-                    )))));
+                      floatingActionButton: new FloatingActionButton(
+                        onPressed: _spinZ,
+                        tooltip: 'Spin',
+                        child: new Icon(Icons.replay),
+                      ),
+                      body: new Center(
+                        child: new Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new FloatingActionButton(
+                              onPressed: () => setState(() {
+                                    if (counter < MAX_ABS_PERSPECTIVE) {
+                                      perspective = _pmat(++counter);
+                                    }
+                                  }),
+                              mini: true,
+                              tooltip: 'Increment',
+                              child: new Icon(Icons.arrow_upward),
+                            ),
+                            new Text(' '),
+                            new Text("Perspective: $counter",
+                                style: DefaultTextStyle.of(context).style.apply(
+                                    fontSizeFactor:
+                                        0.6 + (counter.abs() * .01))),
+                            new Text(' '),
+                            new FloatingActionButton(
+                              onPressed: () => setState(() {
+                                    if (counter > -MAX_ABS_PERSPECTIVE) {
+                                      perspective = _pmat(--counter);
+                                    }
+                                  }),
+                              mini: true,
+                              tooltip: 'Decrement',
+                              child: new Icon(Icons.arrow_downward),
+                            ),
+                          ],
+                        ),
+                      )))),
+        ));
+  }
+
+  void _routePointer(PointerEvent event) {
+    _recognizer.addPointer(event);
+  }
+}
+
+class MyDrag extends Drag {
+  _MyHomePageState state;
+  bool start = false;
+  Offset originOffset;
+  MyDrag(this.state) {
+    start = true;
+  }
+  void update(DragUpdateDetails details) {
+    if (start) {
+      originOffset = details.globalPosition;
+      start = false;
+    }
+    state.setMyTransform(originOffset, details);
   }
 }
