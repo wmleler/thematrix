@@ -42,12 +42,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  double rotation = 0.0;
+  double rotX = 0.0;
+  double rotY = 0.0;
+  double rotZ = 0.0;
   Matrix4 perspective = new Matrix4.identity();
   int counter = 0;
 
   AnimationController animation;
-  String axis = 'Y';
   double scale = 1.0;
   Offset startPoint;
 
@@ -59,27 +60,28 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       vsync: this,
     )..addListener(() {
         setState(() {
-          rotation = -Curves.easeOut.transform(animation.value) * 8 * PI;
+          rotZ = -Curves.easeOut.transform(animation.value) * 8 * PI;
         });
       });
-    rotation = 0.0;
+    rotX = 0.0;
+    rotY = 0.0;
+    rotZ = 0.0;
   }
 
   void _spinZ() {
-    axis = 'Z';
     animation.forward(from: 0.0);
   }
 
-  void _spinY(DragEndDetails details) {
-    // print('details: ${details.velocity.pixelsPerSecond.dx}');
-    axis = 'Y';
-    animation.forward(from: 0.0);
-  }
-
-  void _spinX(DragEndDetails details) {
-    axis = 'X';
-    animation.forward(from: 0.0);
-  }
+//  void _spinY(DragEndDetails details) {
+//    // print('details: ${details.velocity.pixelsPerSecond.dx}');
+//    axis = 'Y';
+//    animation.forward(from: 0.0);
+//  }
+//
+//  void _spinX(DragEndDetails details) {
+//    axis = 'X';
+//    animation.forward(from: 0.0);
+//  }
 
   // http://web.iitd.ac.in/~hegde/cad/lecture/L9_persproj.pdf
   // create perspective matrix
@@ -92,46 +94,49 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
-  _scale_start(ScaleStartDetails details) {
+  _scaleStart(ScaleStartDetails details) {
     print('scale_start: $details');
     // save point where finger went down
     startPoint = details.focalPoint;
   }
 
-  _scale_update(ScaleUpdateDetails details) {
-//    print('${details}');
+  _scaleUpdate(ScaleUpdateDetails details) {
+//    print('$details');
     setState(() {
-      if (details.scale == 1.0) {
+      if (details.pointers.keys.length == 1) {
         // tilt (pan)
         // TODO: perform tilt based on details.focalPoint - startPoint
-        print('scale_update: ${details.focalPoint - startPoint}');
+        Offset p = details.focalPoint - startPoint;
+        rotX = startPoint.dx + p.dx;
+        rotY = startPoint.dy + p.dy;
+        print('rotX: $rotX rotY: $rotY');
+        print('pan: ${details.focalPoint - startPoint}');
+
       } else {
-        // scale
+        // scale or rotate
+        print('scale/rotate: $details');
         scale = details.scale / scale;
       }
     });
   }
 
-  // deprecated. Use focalPoint from _scale_update instead
-  _pan_update(DragUpdateDetails details) {
-    print('pan_update: ${details}');
+  _scaleEnd(ScaleEndDetails details) {
+    print('end: $details'); // velocity
   }
 
   @override
   Widget build(BuildContext context) {
     return new Transform(
-        transform: perspective.scaled(scale, scale, 1.0).multiplied(axis == 'X'
-            ? new Matrix4.rotationX(rotation / 4)
-            : (axis == 'Y'
-                ? new Matrix4.rotationY(rotation / 4)
-                : new Matrix4.rotationZ(rotation / 4))),
+        transform: perspective.scaled(scale, scale, 1.0)
+            ..rotateX(rotX / 100.0)..rotateY(rotY / 100.0)..rotateZ(rotZ / 4),
         alignment: FractionalOffset.center,
         child: new GestureDetector(
 //            onVerticalDragEnd: _spinX,
 //            onHorizontalDragEnd: _spinY,
-//            onPanUpdate: _pan_update,
-            onScaleStart: _scale_start,
-            onScaleUpdate: _scale_update,
+//            onPanUpdate: _panUpdate,
+            onScaleStart: _scaleStart,
+            onScaleUpdate: _scaleUpdate,
+            onScaleEnd: _scaleEnd,
             child: new Center(
                 child: new Scaffold(
                     appBar: new AppBar(
