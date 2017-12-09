@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Flutter Demo',
+      title: 'The Matrix 3D',
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -26,15 +26,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -104,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   // http://web.iitd.ac.in/~hegde/cad/lecture/L9_persproj.pdf
   // create perspective matrix
-  Matrix4 _pmat(num pv) {
+  static Matrix4 _pmat(num pv) {
     return new Matrix4(
       1.0, 0.0, 0.0, 0.0, //
       0.0, 1.0, 0.0, 0.0, //
@@ -208,7 +199,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       )
                   )
               )
-//          ),
+//          ), // Listener
         )
     );
   }
