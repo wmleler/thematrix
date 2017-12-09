@@ -39,9 +39,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   double rotZ;
   int counter;
   Matrix4 perspective;
+  double scale;
 
   AnimationController animation;
-  double scale = 1.0;
   Offset startPoint;
 
   ImmediateMultiDragGestureRecognizer _recognizer;
@@ -70,12 +70,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           rotZ = -Curves.easeOut.transform(animation.value) * 8 * PI;
         });
       });
-    rotX = 0.0;
-    rotY = 0.0;
-    rotZ = 0.0;
     counter = 10;
-    perspective = _pmat(counter);
+    _reset3D();
     _recognizer = new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
+  }
+
+  _reset3D() {
+    setState(() {
+      rotX = 0.0;
+      rotY = 0.0;
+      rotZ = 0.0;
+      perspective = _pmat(counter);
+      scale = 1.0;
+    });
   }
 
   void _spinZ() {
@@ -148,6 +155,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //        child: new Listener(
 //          onPointerDown: _routePointer,
           child: new GestureDetector(
+              onDoubleTap: _reset3D,
 //            onVerticalDragEnd: _spinX,
 //            onHorizontalDragEnd: _spinY,
 //            onPanUpdate: _panUpdate,
@@ -174,7 +182,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       perspective = _pmat(++counter);
                                     }
                                   }),
-                              mini: true,
                               tooltip: 'Increment',
                               child: new Icon(Icons.arrow_upward),
                             ),
@@ -190,7 +197,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       perspective = _pmat(--counter);
                                     }
                                   }),
-                              mini: true,
                               tooltip: 'Decrement',
                               child: new Icon(Icons.arrow_downward),
                             ),
