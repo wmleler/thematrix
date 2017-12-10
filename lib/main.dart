@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'dart:ui' show lerpDouble;
+import 'package:sensors/sensors.dart';
 
 void main() {
   runApp(new MyApp());
@@ -40,6 +41,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int counter;
   Matrix4 perspective;
   double scale;
+  bool level;
+  dynamic accelSubscription;
 
   AnimationController animation;
   Offset startPoint;
@@ -70,12 +73,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           rotZ = -Curves.easeOut.transform(animation.value) * 8 * PI;
         });
       });
+    level = false;
     counter = 10;
     _reset3D();
     _recognizer = new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
 
-  _reset3D() {
+  // reset rotations, perspective, and scale to initial values
+  void  _reset3D() {
     setState(() {
       rotX = 0.0;
       rotY = 0.0;
@@ -126,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         Offset p = details.focalPoint - startPoint;
         rotX = p.dy * 0.015;
         rotY = -p.dx * 0.015;
-//        print('rotX: $rotX rotY: $rotY');
+//        print('X tilt: $rotX Y tilt: $rotY');
 //        print('pan: ${details.focalPoint - startPoint}');
       } else {
         // scale or rotate
@@ -138,6 +143,30 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   _scaleEnd(ScaleEndDetails details) {
 //    print('end: $details'); // velocity
+  }
+
+  _changeMode() {
+    print('changemode');
+    if (level) {
+      level = false;
+      accelSubscription.cancel(); // turn off accelerometer
+    } else {
+      level = true;
+      // https://www.digikey.com/en/articles/techzone/2011/may/using-an-accelerometer-for-inclination-sensing
+      // https://pub.dartlang.org/packages/sensors
+      accelSubscription = accelerometerEvents.listen((AccelerometerEvent ae) {
+        // Do something with the event.
+        double x2 = ae.x * ae.x;
+        double y2 = ae.y * ae.y;
+        double z2 = ae.z * ae.z;
+        setState(() {
+          rotX = -atan(ae.y / sqrt(x2 + z2));
+          rotY = -atan(ae.x / sqrt(y2 + z2));
+//          print('X tilt: $rotX Y tilt: $rotY');
+        });
+      });
+      _reset3D();
+    }
   }
 
   onStart(Offset offset) {
@@ -155,7 +184,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //        child: new Listener(
 //          onPointerDown: _routePointer,
           child: new GestureDetector(
-              onDoubleTap: _reset3D,
+              onLongPress: _reset3D,
+              onDoubleTap: _changeMode,
 //            onVerticalDragEnd: _spinX,
 //            onHorizontalDragEnd: _spinY,
 //            onPanUpdate: _panUpdate,
