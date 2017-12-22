@@ -42,6 +42,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Matrix4 perspective;
   double scale;
   bool level;
+  Color levelColor;
+  TextStyle buttonStyle;
   dynamic accelSubscription;
 
   AnimationController animation;
@@ -74,13 +76,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         });
       });
     level = false;
-    counter = 10;
+    levelColor = Colors.blue;
+    buttonStyle = new TextStyle(color: Colors.white, fontSize: 20.0);
+    counter = 1;
     _reset3D();
     _recognizer = new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
 
   // reset rotations, perspective, and scale to initial values
-  void  _reset3D() {
+  void _reset3D() {
     setState(() {
       rotX = 0.0;
       rotY = 0.0;
@@ -111,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return new Matrix4(
       1.0, 0.0, 0.0, 0.0, //
       0.0, 1.0, 0.0, 0.0, //
-      0.0, 0.0, 1.0, pv * 0.0001, //
+      0.0, 0.0, 1.0, pv * 0.001, //
       0.0, 0.0, 0.0, 1.0,
     );
   }
@@ -145,15 +149,22 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //    print('end: $details'); // velocity
   }
 
+  // change to LEVEL mode and back
   _changeMode() {
     print('changemode');
     if (level) {
       level = false;
+      setState(() {
+        levelColor = Colors.blue;
+      });
       accelSubscription.cancel(); // turn off accelerometer
     } else {
       level = true;
+      levelColor = Colors.green;
       // https://www.digikey.com/en/articles/techzone/2011/may/using-an-accelerometer-for-inclination-sensing
       // https://pub.dartlang.org/packages/sensors
+      // convert x, y, z acceleration into tilts for X and Y axis
+      // Phone laying flat should give 0, 0
       accelSubscription = accelerometerEvents.listen((AccelerometerEvent ae) {
         // Do something with the event.
         double x2 = ae.x * ae.x;
@@ -173,6 +184,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return new MyDrag(this);
   }
 
+  changeLevel(bool value) {
+    print("level: $value");
+    level = value;
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Transform(
@@ -183,61 +199,81 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         alignment: FractionalOffset.center,
 //        child: new Listener(
 //          onPointerDown: _routePointer,
-          child: new GestureDetector(
-              onLongPress: _reset3D,
-              onDoubleTap: _changeMode,
+        child: new GestureDetector(
+            onLongPress: _reset3D,
 //            onVerticalDragEnd: _spinX,
 //            onHorizontalDragEnd: _spinY,
 //            onPanUpdate: _panUpdate,
-              onScaleStart: _scaleStart,
-              onScaleUpdate: _scaleUpdate,
-              onScaleEnd: _scaleEnd,
-              child: new Center(
-                  child: new Scaffold(
-                      appBar: new AppBar(
-                        title: new Text(widget.title),
-                      ),
-                      floatingActionButton: new FloatingActionButton(
-                        onPressed: _spinZ,
-                        tooltip: 'Spin',
-                        child: new Icon(Icons.replay),
-                      ),
-                      body: new Center(
-                        child: new Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            new FloatingActionButton(
-                              onPressed: () => setState(() {
-                                    if (counter < MAX_ABS_PERSPECTIVE) {
-                                      perspective = _pmat(++counter);
-                                    }
-                                  }),
-                              tooltip: 'Increment',
-                              child: new Icon(Icons.arrow_upward),
-                            ),
-                            new Text(' '),
-                            new Text("Perspective: $counter",
-                                style: DefaultTextStyle.of(context).style.apply(
-                                    fontSizeFactor:
-                                        0.6 + (counter.abs() * .01))),
-                            new Text(' '),
-                            new FloatingActionButton(
-                              onPressed: () => setState(() {
-                                    if (counter > -MAX_ABS_PERSPECTIVE) {
-                                      perspective = _pmat(--counter);
-                                    }
-                                  }),
-                              tooltip: 'Decrement',
-                              child: new Icon(Icons.arrow_downward),
-                            ),
-                          ],
-                        ),
-                      )
-                  )
-              )
+            onScaleStart: _scaleStart,
+            onScaleUpdate: _scaleUpdate,
+            onScaleEnd: _scaleEnd,
+            child: new Center(
+                child: new Scaffold(
+              appBar: new AppBar(
+                title: new Text(widget.title),
+              ),
+//                      floatingActionButton: new FloatingActionButton(
+//                        onPressed: _spinZ,
+//                        tooltip: 'Spin',
+//                        child: new Icon(Icons.replay),
+//                      ),
+              body: new Center(
+                child: new Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text(' '),
+                    new FloatingActionButton(
+                      onPressed: () => setState(() {
+                            if (counter < MAX_ABS_PERSPECTIVE) {
+                              perspective = _pmat(++counter);
+                            }
+                          }),
+                      tooltip: 'Increment',
+                      child: new Icon(Icons.arrow_upward),
+                    ),
+                    new Text(' '),
+                    new Text("Perspective: $counter",
+                        style: DefaultTextStyle.of(context).style.apply(
+                            fontSizeFactor: 0.6 + (counter.abs() * .01))),
+                    new Text(' '),
+                    new FloatingActionButton(
+                      onPressed: () => setState(() {
+                            if (counter > -MAX_ABS_PERSPECTIVE) {
+                              perspective = _pmat(--counter);
+                            }
+                          }),
+                      tooltip: 'Decrement',
+                      child: new Icon(Icons.arrow_downward),
+                    ),
+                    new Text('\n'),
+                  ],
+                ),
+              ),
+              persistentFooterButtons: <Widget>[
+                new RaisedButton(
+                  color: Colors.blue,
+                  onPressed: _spinZ,
+                  child: new Text("ANIMATE", style: buttonStyle),
+                ),
+                new Padding(
+                  padding: new EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 15.0),
+                  child: new RaisedButton(
+                    color: levelColor,
+                    onPressed: _changeMode,
+                    child: new Text("LEVEL", style: buttonStyle),
+                  ),
+                ),
+                new RaisedButton(
+                  color: Colors.blue,
+                  onPressed: _reset3D,
+                  child: new Text("RESET", style: buttonStyle),
+                ),
+                new Text(" "),
+              ],
+            ))
 //          ), // Listener
-        )
-    );
+            ));
   }
 
   void _routePointer(PointerEvent event) {
