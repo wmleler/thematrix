@@ -151,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   // change to LEVEL mode and back
   _changeMode() {
-    print('changemode');
+//    print('changemode');
     if (level) {
       level = false;
       setState(() {
@@ -185,7 +185,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   changeLevel(bool value) {
-    print("level: $value");
+//    print("level: $value");
     level = value;
   }
 
@@ -207,8 +207,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             onScaleStart: _scaleStart,
             onScaleUpdate: _scaleUpdate,
             onScaleEnd: _scaleEnd,
-            child: new Center(
-                child: new Scaffold(
+            child: new Scaffold(
               appBar: new AppBar(
                 title: new Text(widget.title),
               ),
@@ -253,7 +252,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 new RaisedButton(
                   color: Colors.blue,
                   onPressed: _spinZ,
-                  child: new Text("ANIMATE", style: buttonStyle),
+                  child: new Text("ROTATE", style: buttonStyle),
                 ),
                 new Padding(
                   padding: new EdgeInsets.symmetric(
@@ -269,9 +268,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   onPressed: _reset3D,
                   child: new Text("RESET", style: buttonStyle),
                 ),
-                new Text(" "),
               ],
-            ))
+            )
 //          ), // Listener
             ));
   }
