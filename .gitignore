@@ -9,7 +9,7 @@ packages
 pubspec.lock
 .flutter-plugins
 
-.ios/Runner.xcodeproj/
-.ios/Runner.xcworkspace/
-.ios/Podfile
-.ios/Podfile.lock
+ios/Runner.xcodeproj/
+ios/Runner.xcworkspace/
+ios/Podfile
+ios/Podfile.lock
