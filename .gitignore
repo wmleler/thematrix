@@ -10,6 +10,8 @@ pubspec.lock
 .flutter-plugins
 
 ios/Runner.xcodeproj/
+ios/Runner.xcodeproj/project.pbxproj
 ios/Runner.xcworkspace/
+ios/Runner.xcworkspace/contents.xcworkspacedata
 ios/Podfile
 ios/Podfile.lock
