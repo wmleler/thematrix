@@ -9,7 +9,7 @@ void main() {
   runApp(new MyApp());
 }
 
-const int MAX_ABS_PERSPECTIVE = 20;
+const int MAX_ABS_PERSPECTIVE = 2;
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -252,7 +252,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 new RaisedButton(
                   color: Colors.blue,
                   onPressed: _spinZ,
-                  child: new Text("ROTATE", style: buttonStyle),
+                  child: new Text("SPIN", style: buttonStyle),
                 ),
                 new Padding(
                   padding: new EdgeInsets.symmetric(
