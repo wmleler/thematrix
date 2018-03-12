@@ -12,3 +12,5 @@ Try doing the following to show it off:
 1. To reset the display to the starting configuration (no rotations), just touch and hold your finger on some empty space. Alternatively, press the "RESET" button, but you may not be able to do this.
 1. The app also allows you to manipulate perspective. Use the two arrow buttons to vary the perspective from -2 to +2. Normal perspective is 1. If perspective is zero, there is no perspective, so things stay the same size regardless of their distance. When perspective is negative, then things that are further away actually get larger!
 1. Reset the display again, and now touch the "LEVEL" button. The display tries to keep parallel to the ground (like a level).
+
+The shadows are a bit wonky. This is probably a bug in Flutter, but just ignore it for now.
