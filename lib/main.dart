@@ -38,6 +38,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   double rotX;
   double rotY;
   double rotZ;
+  double saveX;
+  double saveY;
+  double baseX;
+  double baseY;
   int counter;
   Matrix4 perspective;
   double scale;
@@ -49,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   AnimationController animation;
   Offset startPoint;
 
-  ImmediateMultiDragGestureRecognizer _recognizer;
+//  ImmediateMultiDragGestureRecognizer _recognizer;
 
   setMyTransform(Offset originOffset, DragUpdateDetails details) {
     setState(() {
@@ -80,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     buttonStyle = new TextStyle(color: Colors.white, fontSize: 20.0);
     counter = 1;
     _reset3D();
-    _recognizer = new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
+//    _recognizer = new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
 
   // reset rotations, perspective, and scale to initial values
@@ -89,6 +93,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       rotX = 0.0;
       rotY = 0.0;
       rotZ = 0.0;
+      baseX = 0.0;
+      baseY = 0.0;
       perspective = _pmat(counter);
       scale = 1.0;
     });
@@ -129,16 +135,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   _scaleUpdate(ScaleUpdateDetails details) {
 //    print('$details');
     setState(() {
-      if (details.pointers.keys.length == 1) {
-        // tilt (pan)
-        // TODO: perform tilt based on details.focalPoint - startPoint
+      if (details.scale == 1.0) {  // tilt (pan)
         Offset p = details.focalPoint - startPoint;
-        rotX = p.dy * 0.015;
-        rotY = -p.dx * 0.015;
+        saveX = 0.015 * p.dy;
+        rotX = baseX + saveX;
+        saveY = -0.015 * p.dx;
+        rotY = baseY + saveY;
 //        print('X tilt: $rotX Y tilt: $rotY');
 //        print('pan: ${details.focalPoint - startPoint}');
       } else {
-        // scale or rotate
+        // scale (or rotate)œ
 //        print('scale/rotate: $details');
         scale = details.scale / scale;
       }
@@ -147,6 +153,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   _scaleEnd(ScaleEndDetails details) {
 //    print('end: $details'); // velocity
+    baseX = saveX;
+    baseY = saveY;
   }
 
   // change to LEVEL mode and back
@@ -274,9 +282,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ));
   }
 
-  void _routePointer(PointerEvent event) {
-    _recognizer.addPointer(event);
-  }
+//  void _routePointer(PointerEvent event) {
+//    _recognizer.addPointer(event);
+//  }
 }
 
 class MyDrag extends Drag {
@@ -286,6 +294,7 @@ class MyDrag extends Drag {
   MyDrag(this.state) {
     start = true;
   }
+
   void update(DragUpdateDetails details) {
     if (start) {
       originOffset = details.globalPosition;
