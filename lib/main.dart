@@ -3,13 +3,18 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'dart:ui' show lerpDouble;
+import 'package:flutter/services.dart';
 import 'package:sensors/sensors.dart';
 
 void main() {
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(new MyApp());
 }
 
-const int MAX_ABS_PERSPECTIVE = 2;
+const int maxAbsPerspective = 2;
+const double pi = 3.1415926535897932;
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -76,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       vsync: this,
     )..addListener(() {
         setState(() {
-          rotZ = -Curves.easeOut.transform(animation.value) * 8 * PI;
+          rotZ = -Curves.easeOut.transform(animation.value) * 8 * pi;
         });
       });
     level = false;
@@ -208,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //        child: new Listener(
 //          onPointerDown: _routePointer,
         child: new GestureDetector(
-            onLongPress: _reset3D,
+            onDoubleTap: _reset3D,
 //            onVerticalDragEnd: _spinX,
 //            onHorizontalDragEnd: _spinY,
 //            onPanUpdate: _panUpdate,
@@ -231,7 +236,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     new Text(' '),
                     new FloatingActionButton(
                       onPressed: () => setState(() {
-                            if (counter < MAX_ABS_PERSPECTIVE) {
+                            if (counter < maxAbsPerspective) {
                               perspective = _pmat(++counter);
                             }
                           }),
@@ -245,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     new Text(' '),
                     new FloatingActionButton(
                       onPressed: () => setState(() {
-                            if (counter > -MAX_ABS_PERSPECTIVE) {
+                            if (counter > -maxAbsPerspective) {
                               perspective = _pmat(--counter);
                             }
                           }),
