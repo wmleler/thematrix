@@ -4,59 +4,63 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'dart:ui' show lerpDouble;
 import 'package:flutter/services.dart';
-import 'package:sensors/sensors.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-  runApp(new MyApp());
+  runApp(const MyApp());
 }
 
 const int maxAbsPerspective = 2;
 const double pi = 3.1415926535897932;
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'The Matrix 3D',
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'The Matrix 3D'),
+      home: const MyHomePage(title: 'The Matrix 3D'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  // ignore: library_private_types_in_public_api
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  double rotX;
-  double rotY;
-  double rotZ;
-  double saveX;
-  double saveY;
-  double baseX;
-  double baseY;
-  int counter;
-  Matrix4 perspective;
-  double scale;
-  bool level;
-  Color levelColor;
-  TextStyle buttonStyle;
+  late AnimationController animation;
+  late double rotX;
+  late double rotY;
+  late double rotZ;
+  late double saveX;
+  late double saveY;
+  late double baseX;
+  late double baseY;
+  late int counter;
+  late Matrix4 perspective;
+  late double scale;
+  late bool level;
+  late Color levelColor;
+  late TextStyle buttonStyle;
   dynamic accelSubscription;
 
-  AnimationController animation;
-  Offset startPoint;
+  late Offset startPoint;
 
 //  ImmediateMultiDragGestureRecognizer _recognizer;
 
@@ -76,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    animation = new AnimationController(
+    animation = AnimationController(
       duration: const Duration(milliseconds: 4000),
       vsync: this,
     )..addListener(() {
@@ -86,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       });
     level = false;
     levelColor = Colors.blue;
-    buttonStyle = new TextStyle(color: Colors.white, fontSize: 20.0);
+    buttonStyle = const TextStyle(color: Colors.white, fontSize: 20.0);
     counter = 1;
     _reset3D();
 //    _recognizer = new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
@@ -123,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   // http://web.iitd.ac.in/~hegde/cad/lecture/L9_persproj.pdf
   // create perspective matrix
   static Matrix4 _pmat(num pv) {
-    return new Matrix4(
+    return Matrix4(
       1.0, 0.0, 0.0, 0.0, //
       0.0, 1.0, 0.0, 0.0, //
       0.0, 0.0, 1.0, pv * 0.001, //
@@ -140,7 +144,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   _scaleUpdate(ScaleUpdateDetails details) {
 //    print('$details');
     setState(() {
-      if (details.scale == 1.0) {  // tilt (pan)
+      if (details.scale == 1.0) {
+        // tilt (pan)
         Offset p = details.focalPoint - startPoint;
         saveX = 0.015 * p.dy;
         rotX = baseX + saveX;
@@ -194,7 +199,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   onStart(Offset offset) {
-    return new MyDrag(this);
+    return MyDrag(this);
   }
 
   changeLevel(bool value) {
@@ -204,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return new Transform(
+    return Transform(
         transform: perspective.scaled(scale, scale, 1.0)
           ..rotateX(rotX)
           ..rotateY(rotY)
@@ -212,7 +217,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         alignment: FractionalOffset.center,
 //        child: new Listener(
 //          onPointerDown: _routePointer,
-        child: new GestureDetector(
+        child: GestureDetector(
             onDoubleTap: _reset3D,
 //            onVerticalDragEnd: _spinX,
 //            onHorizontalDragEnd: _spinY,
@@ -220,66 +225,63 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             onScaleStart: _scaleStart,
             onScaleUpdate: _scaleUpdate,
             onScaleEnd: _scaleEnd,
-            child: new Scaffold(
-              appBar: new AppBar(
-                title: new Text(widget.title),
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(widget.title),
               ),
 //                      floatingActionButton: new FloatingActionButton(
 //                        onPressed: _spinZ,
 //                        tooltip: 'Spin',
 //                        child: new Icon(Icons.replay),
 //                      ),
-              body: new Center(
-                child: new Column(
+              body: Center(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    new Text(' '),
-                    new FloatingActionButton(
+                    const Text(' '),
+                    FloatingActionButton(
                       onPressed: () => setState(() {
-                            if (counter < maxAbsPerspective) {
-                              perspective = _pmat(++counter);
-                            }
-                          }),
+                        if (counter < maxAbsPerspective) {
+                          perspective = _pmat(++counter);
+                        }
+                      }),
                       tooltip: 'Increment',
-                      child: new Icon(Icons.arrow_upward),
+                      child: const Icon(Icons.arrow_upward),
                     ),
-                    new Text(' '),
-                    new Text("Perspective: $counter",
+                    const Text(' '),
+                    Text("Perspective: $counter",
                         style: DefaultTextStyle.of(context).style.apply(
                             fontSizeFactor: 0.6 + (counter.abs() * .01))),
-                    new Text(' '),
-                    new FloatingActionButton(
+                    const Text(' '),
+                    FloatingActionButton(
                       onPressed: () => setState(() {
-                            if (counter > -maxAbsPerspective) {
-                              perspective = _pmat(--counter);
-                            }
-                          }),
+                        if (counter > -maxAbsPerspective) {
+                          perspective = _pmat(--counter);
+                        }
+                      }),
                       tooltip: 'Decrement',
-                      child: new Icon(Icons.arrow_downward),
+                      child: const Icon(Icons.arrow_downward),
                     ),
-                    new Text('\n'),
+                    const Text('\n'),
                   ],
                 ),
               ),
               persistentFooterButtons: <Widget>[
-                new RaisedButton(
-                  color: Colors.blue,
+                ElevatedButton(
                   onPressed: _spinZ,
-                  child: new Text("SPIN", style: buttonStyle),
+                  child: Text("SPIN", style: buttonStyle),
                 ),
-                new Padding(
-                  padding: new EdgeInsets.symmetric(
+                Padding(
+                  padding: const EdgeInsets.symmetric(
                       vertical: 10.0, horizontal: 15.0),
-                  child: new RaisedButton(
-                    color: levelColor,
+                  child: ElevatedButton(
                     onPressed: _changeMode,
-                    child: new Text("LEVEL", style: buttonStyle),
+                    child: Text("LEVEL", style: buttonStyle),
                   ),
                 ),
-                new RaisedButton(
-                  color: Colors.blue,
+                ElevatedButton(
                   onPressed: _reset3D,
-                  child: new Text("RESET", style: buttonStyle),
+                  child: Text("RESET", style: buttonStyle),
                 ),
               ],
             )
@@ -293,13 +295,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 }
 
 class MyDrag extends Drag {
+  // ignore: library_private_types_in_public_api
   _MyHomePageState state;
   bool start = false;
-  Offset originOffset;
+  late Offset originOffset;
+  // ignore: library_private_types_in_public_api
   MyDrag(this.state) {
     start = true;
   }
 
+  @override
   void update(DragUpdateDetails details) {
     if (start) {
       originOffset = details.globalPosition;
